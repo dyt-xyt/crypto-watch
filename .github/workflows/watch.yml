@@ -1,0 +1,38 @@
+name: crypto-watch
+
+on:
+  schedule:
+    # 每 5 分钟跑一次 (GitHub 实际会延迟 5-20 分钟, 属正常)
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 把上一轮的 state.json 带过来, 避免重复报警
+      - name: 恢复状态
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: state-${{ github.run_id }}
+          restore-keys: |
+            state-
+
+      - name: 跑一轮盯盘
+        env:
+          WXPUSHER_APPTOKEN: ${{ secrets.WXPUSHER_APPTOKEN }}
+          WXPUSHER_UID: ${{ secrets.WXPUSHER_UID }}
+          SYMBOLS: BTCUSDT,SOLUSDT,ETHUSDT
+          COOLDOWN_SEC: "1800"
+        run: python watch.py
