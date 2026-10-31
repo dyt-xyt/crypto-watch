@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """GitHub Actions 单次运行版 —— 跑完就退出, 由 cron 定时触发
 
 环境变量:
@@ -18,6 +18,11 @@ def main():
         "bot", os.path.join(HERE, "bot_core.py"))
     bot = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(bot)
+
+    # GitHub 的美国机房被币安主站封锁(451), 改用官方公开数据节点
+    bot.BASE = os.environ.get("BINANCE_BASE", "https://data-api.binance.vision").strip()
+    bot.CLOUD = True
+    print(f"数据源: {bot.BASE}")
 
     cfg = {
         "channel": "wxpusher",
