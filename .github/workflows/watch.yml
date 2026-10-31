@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write   # 需要写 state.json, 与本地共享"已推送"记录
 
 jobs:
   watch:
@@ -20,19 +20,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      # 把上一轮的 state.json 带过来, 避免重复报警
-      - name: 恢复状态
-        uses: actions/cache@v4
-        with:
-          path: state.json
-          key: state-${{ github.run_id }}
-          restore-keys: |
-            state-
-
       - name: 跑一轮盯盘
         env:
           WXPUSHER_APPTOKEN: ${{ secrets.WXPUSHER_APPTOKEN }}
           WXPUSHER_UID: ${{ secrets.WXPUSHER_UID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           SYMBOLS: BTCUSDT,SOLUSDT,ETHUSDT
           COOLDOWN_SEC: "1800"
         run: python watch.py
