@@ -93,11 +93,18 @@ def http(url, data=None, timeout=20, form=False):
         return r.read().decode("utf-8", "ignore")
 
 
+BASE = "https://fapi.binance.com"
+CLOUD = False
+
+
 def api(path, n=4):
+    p = path
+    if CLOUD:
+        p = p.replace("/fapi/v1/", "/api/v3/")
     last = None
     for i in range(n):
         try:
-            return json.loads(http("https://fapi.binance.com" + path))
+            return json.loads(http(BASE + p))
         except Exception as e:
             last = e
             if i == n - 1:
@@ -222,7 +229,10 @@ def evaluate(cfg, sym, state, quiet=False):
     h4 = kl(sym, "4h", 120)
     h1 = kl(sym, "1h", 200)
     m15 = kl(sym, "15m", 60)
-    fr = float(api(f"/fapi/v1/premiumIndex?symbol={sym}")["lastFundingRate"]) * 100
+    try:
+        fr = float(api(f"/fapi/v1/premiumIndex?symbol={sym}")["lastFundingRate"]) * 100
+    except Exception:
+        fr = 0.0
 
     d = 2 if p < 1000 else 0
     a1 = atr(h1)[-1] or (p * 0.01)
