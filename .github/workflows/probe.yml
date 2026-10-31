@@ -1,0 +1,30 @@
+name: probe
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 测各交易所连通性
+        run: |
+          for u in \
+            "https://api.binance.com/api/v3/ping" \
+            "https://fapi.binance.com/fapi/v1/ping" \
+            "https://data-api.binance.vision/api/v3/ping" \
+            "https://api.binance.us/api/v3/ping" \
+            "https://api.exchange.coinbase.com/products/BTC-USD" \
+            "https://api.kraken.com/0/public/Time" \
+            "https://api.bybit.com/v5/market/time" \
+            "https://www.okx.com/api/v5/public/time" \
+            "https://api.gateio.ws/api/v4/spot/time" \
+            "https://api.mexc.com/api/v3/ping" \
+          ; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 12 "$u" || echo "ERR")
+            echo "$code  $u"
+          done
