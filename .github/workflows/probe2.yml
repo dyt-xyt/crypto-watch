@@ -1,0 +1,41 @@
+name: probe2
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 测数据接口
+        run: |
+          echo "=== binance.vision 现货K线 ==="
+          curl -s -o /dev/null -w "klines %{http_code}\n" --max-time 12 \
+            "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=2"
+          curl -s --max-time 12 \
+            "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=2" | head -c 300
+          echo ""
+          echo "=== binance.vision 是否支持 fapi ==="
+          curl -s -o /dev/null -w "fapi-ping %{http_code}\n" --max-time 12 \
+            "https://data-api.binance.vision/fapi/v1/ping"
+          curl -s -o /dev/null -w "fapi-klines %{http_code}\n" --max-time 12 \
+            "https://data-api.binance.vision/fapi/v1/klines?symbol=BTCUSDT&interval=4h&limit=2"
+          echo ""
+          echo "=== OKX 永续K线 ==="
+          curl -s -o /dev/null -w "okx-candles %{http_code}\n" --max-time 12 \
+            "https://www.okx.com/api/v5/market/candles?instId=BTC-USDT-SWAP&bar=4H&limit=2"
+          curl -s --max-time 12 \
+            "https://www.okx.com/api/v5/market/candles?instId=BTC-USDT-SWAP&bar=4H&limit=2" | head -c 300
+          echo ""
+          echo "=== OKX 资金费率 ==="
+          curl -s -o /dev/null -w "okx-funding %{http_code}\n" --max-time 12 \
+            "https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USDT-SWAP"
+          echo ""
+          echo "=== binance.vision 现货价格 ==="
+          curl -s --max-time 12 \
+            "https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT"
+          echo ""
