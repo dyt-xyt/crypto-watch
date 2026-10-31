@@ -2,12 +2,11 @@ name: crypto-watch
 
 on:
   schedule:
-    # 每 5 分钟跑一次 (GitHub 实际会延迟 5-20 分钟, 属正常)
     - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
 permissions:
-  contents: write   # 需要写 state.json, 与本地共享"已推送"记录
+  contents: write
 
 jobs:
   watch:
@@ -15,12 +14,10 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: 跑一轮盯盘
+      - name: run
         env:
           WXPUSHER_APPTOKEN: ${{ secrets.WXPUSHER_APPTOKEN }}
           WXPUSHER_UID: ${{ secrets.WXPUSHER_UID }}
