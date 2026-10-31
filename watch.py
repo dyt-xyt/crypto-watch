@@ -66,6 +66,10 @@ def main():
         print(f"{sym} {p:,.2f}  触发 {len(ev)} 条")
         for item in ev:
             key, title, body = item[0], item[1], item[2]
+            meta = item[3] if len(item) > 3 else None
+            if not (meta and meta.get("ok")):
+                print(f"  -> {title} 盈亏比/止损不达标, 静默")
+                continue
             if cloudstate.already_pushed(state, key, cfg["cooldown_sec"]):
                 print(f"  -> {title} 已被另一台设备推送, 跳过")
                 continue
